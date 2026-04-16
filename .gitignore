@@ -1,8 +1,5 @@
 # Reference: https://github.com/github/gitignore/blob/main/Python.gitignore 
 
-# Database - supposed to be local
-
-jobs.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
