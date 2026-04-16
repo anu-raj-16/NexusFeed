@@ -18,7 +18,7 @@ def save_to_database(matches):
 
     if matches:
         cursor.executemany(
-            "INSERT INTO jobs (title, description, source, published) VALUES (:title, :description, :source, :published)", 
+            "INSERT OR IGNORE INTO jobs (title, description, source, published) VALUES (:title, :description, :source, :published)", 
             matches
         )
         print(f"Inserted {cursor.rowcount} rows.")
