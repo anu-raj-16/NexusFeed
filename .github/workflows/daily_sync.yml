@@ -22,7 +22,7 @@ jobs:
           pip install feedparser
 
       - name: Run aggregator
-        run: python aggregator.py
+        run: python main.py
 
       - name: Commit and push changes
         run: |
