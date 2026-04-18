@@ -20,9 +20,9 @@
                 const container = document.getElementById('jobs-section');
                 const keyword = document.getElementById('search').value; 
 
-                url = `https://nexusfeed-06zv.onrender.com`
+                url = `https://nexusfeed-06zv.onrender.com/api/jobs`
                 if (keyword) {
-                    url = `https://nexusfeed-06zv.onrender.com/search?keyword=${keyword}`
+                    url = `https://nexusfeed-06zv.onrender.com/api/jobs/search?keyword=${keyword}`
                 }
                 try {
                     const res = await fetch(url);
