@@ -21,7 +21,7 @@ public class NexusBackendApplication {
     public CommandLineRunner diagnosticTest() {
         return args -> {
             System.out.println("\n--- 🔍 DATABASE DIAGNOSTIC ---");
-            String url = "jdbc:sqlite:jobs.db"; // Match your properties path
+            String url = "jdbc:sqlite:nexus-backend/jobs.db"; // Match your properties path
             
             try (Connection conn = DriverManager.getConnection(url)) {
                 ResultSet rs = conn.getMetaData().getTables(null, null, "jobs", null);

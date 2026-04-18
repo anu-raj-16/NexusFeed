@@ -3,7 +3,7 @@ import feedparser
 import aggregator
 
 def save_to_database(matches):
-    conn = sqlite3.connect("jobs.db")
+    conn = sqlite3.connect("nexus-backend/jobs.db")
     cursor = conn.cursor()
 
     cursor.execute('''
