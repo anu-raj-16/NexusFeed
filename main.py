@@ -1,6 +1,11 @@
 import aggregator
 import backend
+import sqlite3
 
+conn = sqlite3.connect("jobs.db")
+cursor = conn.cursor()
+cursor.execute("DROP TABLE IF EXISTS jobs;")
+conn.commit()
 
 
 jobs_list = aggregator.agg_jobs()

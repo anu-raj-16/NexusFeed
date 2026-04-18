@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<htm lang = "en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NexusFeed</title>
+        <style>
+            body { font-family: 'Oswald', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 40px; }
+            .job-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
+            .job-card:hover { transform: translateY(-5px); }
+            h3 { color: #1aaee8; margin-top: 0; }
+            #search { padding: 10px; width: 300px; border-radius: 6px; border: 1px solid #ddd; }
+            button { padding: 10px 20px; border-radius: 6px; border: none; background: #1aaee8; color: white; cursor: pointer; }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                loadJobs();
+            });
+            async function loadJobs() {
+                const container = document.getElementById('jobs-section');
+                const keyword = document.getElementById('search').value; 
+
+                url = `http://localhost:8080/api/jobs`
+                if (keyword) {
+                    url = `http://localhost:8080/api/jobs/search?keyword=${keyword}`
+                }
+                try {
+                    const res = await fetch(url);
+
+                    if (res.ok) {
+                        const jobs = await res.json();
+                        console.log("Jobs received:", jobs);
+                        const htmlTemplate = jobs.map(job => `  
+                            <div class="job-card">
+                                <h3>Title: ${job.title}</h3>
+                                <p>Description: ${job.description}</p>
+                                <p>Source: ${job.source} | Published: ${job.published}</p>
+                            </div>`
+                        ).join('');
+
+                        container.innerHTML = htmlTemplate;
+                    } else {
+                        container.innerHTML = htmlTemplate || "<p>No jobs found for that keyword.</p>";
+                    }
+                } catch (error) {
+                    container.innerHTML = "<p>Backend is offline. Run your Java app!</p>";
+                }
+            }
+            loadJobs();
+        </script>
+    </head>
+    <body>
+        <h1>NexusFeed - Content Aggregator</h1>
+        <input type="text" id="search" name="username" placeholder="Enter text">
+        <button type="button" onclick="loadJobs()">Search</button>
+        <div id = "jobs-section">
+            <p>Loading users, please wait...</p>
+        </div>      
+    </body>
+</html>
