@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
@@ -18,7 +19,17 @@ public class NexusBackendApplication {
 	}
 
     @Bean
-    public CommandLineRunner diagnosticTest() {
+    public CommandLineRunner componentCheck(ApplicationContext ctx) {
+        return args -> {
+            System.out.println("\n--- 🔍 COMPONENT CHECK ---");
+            boolean exists = ctx.containsBean("jobController");
+            System.out.println("✅ JobController bean found: " + exists);
+            System.out.println("--------------------------\n");
+        };
+    }
+
+    @Bean
+    public CommandLineRunner databaseCheck() {
         return args -> {
             System.out.println("\n--- 🔍 DATABASE DIAGNOSTIC ---");
             String url = "jdbc:sqlite:jobs.db"; // Match your properties path
