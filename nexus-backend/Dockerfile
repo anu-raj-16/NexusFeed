@@ -1,5 +1,5 @@
 # Stage 1: Build the JAR
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 # 1. Copy the pom.xml first to cache dependencies (Faster builds)
