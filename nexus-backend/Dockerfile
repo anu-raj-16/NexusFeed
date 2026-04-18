@@ -15,11 +15,14 @@ RUN mvn clean package -DskipTests
 # Stage 2: Run
 FROM eclipse-temurin:21-jre
 WORKDIR /app
+
+# Copy the built Java app
 COPY --from=build /app/target/*.jar app.jar
 
-# 4. Copy the database file into the image so Java can see it
-# If the db is in the ROOT of your repo, use this:
-COPY ../jobs.db . 
+# COPY THE DATABASE (Crucial!)
+# If your DB is in the root of your repo, use this:
+COPY nexus_feed.db . 
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
