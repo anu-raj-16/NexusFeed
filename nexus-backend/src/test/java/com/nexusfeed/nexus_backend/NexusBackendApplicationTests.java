@@ -8,6 +8,6 @@ class NexusBackendApplicationTests {
 
 	@Test
 	void contextLoads() {
-	}
 
+	}
 }
