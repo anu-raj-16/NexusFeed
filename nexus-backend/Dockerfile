@@ -21,7 +21,7 @@ COPY --from=build /app/target/*.jar app.jar
 
 # COPY THE DATABASE (Crucial!)
 # If your DB is in the root of your repo, use this:
-COPY nexus_feed.db . 
+COPY jobs.db . 
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
