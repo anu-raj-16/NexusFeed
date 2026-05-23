@@ -2,6 +2,7 @@ package com.nexusfeed.nexus_backend.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,14 +35,19 @@ public class JobController {
         return jobRepo.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword);
     }
 
-    @GetMapping("/{id}") // Matches /api/jobs/1
-    public Job findById(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Job> findById(@PathVariable Long id) {
         return jobRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Job not found with id: " + id));
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    void deleteEmployee(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteJob(@PathVariable Long id) {
+        if (!jobRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
         jobRepo.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

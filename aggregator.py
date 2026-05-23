@@ -55,7 +55,8 @@ def agg_jobs():
                         "title": entry_title,
                         "description": entry_desc,
                         "source": "We Work Remotely",
-                        "published": entry_pub
+                        "published": entry_pub,
+                        "url": entry.get('link', None),
                     }
                     matches.append(job_data)
                 
@@ -66,6 +67,7 @@ def agg_jobs():
     except Exception as e:
         # 3. Handle the parsing error here
         print(f"Parsing failed or feed is malformed: {e}")
+        return []
     
     finally:
         del feed

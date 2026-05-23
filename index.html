@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<htm lang = "en">
+<html lang = "en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +13,12 @@
             button { padding: 10px 20px; border-radius: 6px; border: none; background: #1aaee8; color: white; cursor: pointer; }
         </style>
         <script>
+            function escapeHtml(str) {
+                const d = document.createElement('div');
+                d.textContent = str;
+                return d.innerHTML;
+            }
+
             document.addEventListener('DOMContentLoaded', () => {
                 loadJobs();
             });
@@ -20,9 +26,9 @@
                 const container = document.getElementById('jobs-section');
                 const keyword = document.getElementById('search').value; 
 
-                url = `https://nexusfeed-06zv.onrender.com`
+                url = `https://nexusfeed-06zv.onrender.com/api/jobs`
                 if (keyword) {
-                    url = `https://nexusfeed-06zv.onrender.com/search?keyword=${keyword}`
+                    url = `https://nexusfeed-06zv.onrender.com/api/jobs/search?keyword=${keyword}`
                 }
                 try {
                     const res = await fetch(url);
@@ -30,23 +36,22 @@
                     if (res.ok) {
                         const jobs = await res.json();
                         console.log("Jobs received:", jobs);
-                        const htmlTemplate = jobs.map(job => `  
+                        const htmlTemplate = jobs.map(job => `
                             <div class="job-card">
-                                <h3>Title: ${job.title}</h3>
-                                <p>Description: ${job.description}</p>
-                                <p>Source: ${job.source} | Published: ${job.published}</p>
+                                <h3>${escapeHtml(job.title)}</h3>
+                                <p>${escapeHtml(job.description)}</p>
+                                <p>Source: ${escapeHtml(job.source)} | Published: ${escapeHtml(job.published)}</p>
                             </div>`
                         ).join('');
 
                         container.innerHTML = htmlTemplate;
                     } else {
-                        container.innerHTML = htmlTemplate || "<p>No jobs found for that keyword.</p>";
+                        container.innerHTML = "<p>No jobs found for that keyword.</p>";
                     }
                 } catch (error) {
                     container.innerHTML = "<p>Backend is offline. Run your Java app!</p>";
                 }
             }
-            loadJobs();
         </script>
     </head>
     <body>
