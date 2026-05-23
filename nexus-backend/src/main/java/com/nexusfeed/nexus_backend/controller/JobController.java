@@ -24,6 +24,13 @@ public class JobController {
         this.jobRepo = repo;
     }
 
+    @GetMapping("/debug/path")
+    public String debugPath() {
+        return "Working dir: " + System.getProperty("user.dir") 
+            + " | DB exists: " + new java.io.File("app-name/jobs.db").exists()
+            + " | Absolute path: " + new java.io.File("app-name/jobs.db").getAbsolutePath();
+    }
+
     @GetMapping
     public List<Job> listAll(){
         return jobRepo.findAll();
