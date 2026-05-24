@@ -1,13 +1,12 @@
+import sqlite3
 import aggregator
 import backend
-import sqlite3
 
-conn = sqlite3.connect("nexus-backend/jobs.db")
-cursor = conn.cursor()
-cursor.execute("DROP TABLE IF EXISTS jobs;")
-conn.commit()
+if __name__ == "__main__":
+    conn = backend.get_connection()
+    backend.init_db(conn)
 
+    matches = aggregator.agg_jobs()
+    backend.save_jobs(conn, matches)
 
-jobs_list = aggregator.agg_jobs()
-
-backend.save_to_database(jobs_list)
+    conn.close()

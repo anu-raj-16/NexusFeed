@@ -1,11 +1,14 @@
 import sqlite3
-import feedparser
 import aggregator
 
 DB_PATH = "nexus-backend/jobs.db"
 
-def save_to_database(matches):
-    conn = sqlite3.connect(DB_PATH)
+
+def get_connection():
+    return sqlite3.connect(DB_PATH)
+
+
+def init_db(conn):
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -30,18 +33,22 @@ def save_to_database(matches):
         )
     ''')
 
-    if matches:
-        cursor.executemany(
-            """
-            INSERT OR IGNORE INTO jobs (title, description, source, published, url)
-            VALUES (:title, :description, :source, :published, :url)
-            """,
-            matches
-        )
-        print(f"Inserted {cursor.rowcount} rows.")
-
     conn.commit()
+    print("Database initialized.")
 
-    conn.close()
 
-    print("Table created successfully.")
+def save_jobs(conn, matches):
+    if not matches:
+        print("No matches to insert.")
+        return
+
+    cursor = conn.cursor()
+    cursor.executemany(
+        """
+        INSERT OR IGNORE INTO jobs (title, description, source, published, url)
+        VALUES (:title, :description, :source, :published, :url)
+        """,
+        matches
+    )
+    conn.commit()
+    print(f"Inserted {cursor.rowcount} new jobs.")
