@@ -23,6 +23,7 @@
                 loadJobs();
             });
             async function uploadResume() {
+                console.log("uploadResume called");
                 const file = document.getElementById('resumeFile').files[0];
                 const formData = new FormData();
                 formData.append('file', file);
@@ -70,7 +71,7 @@
         <h1>NexusFeed - Content Aggregator</h1>
         <input type="text" id="search" name="username" placeholder="Enter text">
         <input type="file" id="resumeFile" accept=".pdf">
-        <button onclick="uploadResume()">Upload Resume</button>
+        <button type="button" onclick="uploadResume()">Upload Resume</button>
         <button type="button" onclick="loadJobs()">Search</button>
         <div id = "jobs-section">
             <p>Loading users, please wait...</p>
