@@ -29,7 +29,7 @@ public class Resume {
     @Column(name = "vector_id")
     private String vectorId;
     
-    @Temporal(TemporalType.TIMESTAMP)
-    private java.util.Date uploadedAt;
+    @Column(name = "uploaded_at")
+    private java.time.LocalDateTime uploadedAt;
 }
 

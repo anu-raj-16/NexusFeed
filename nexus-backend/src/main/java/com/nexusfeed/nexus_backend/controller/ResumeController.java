@@ -34,6 +34,7 @@ public class ResumeController {
             Resume resume = new Resume();
             resume.setRawText(text);
             resumeRepo.save(resume);
+            resume.setUploadedAt(java.time.LocalDateTime.now());
             return "Resume uploaded!";
         } catch (IOException e) {
             return "Upload failed.";
