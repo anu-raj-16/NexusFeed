@@ -22,6 +22,18 @@
             document.addEventListener('DOMContentLoaded', () => {
                 loadJobs();
             });
+            async function uploadResume() {
+                const file = document.getElementById('resumeFile').files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const res = await fetch('https://nexusfeed-06zv.onrender.com/api/resumes/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const msg = await res.text();
+                alert(msg);
+            }
             async function loadJobs() {
                 const container = document.getElementById('jobs-section');
                 const keyword = document.getElementById('search').value; 
@@ -57,6 +69,8 @@
     <body>
         <h1>NexusFeed - Content Aggregator</h1>
         <input type="text" id="search" name="username" placeholder="Enter text">
+        <input type="file" id="resumeFile" accept=".pdf">
+        <button onclick="uploadResume()">Upload Resume</button>
         <button type="button" onclick="loadJobs()">Search</button>
         <div id = "jobs-section">
             <p>Loading users, please wait...</p>
