@@ -33,9 +33,9 @@ public class ResumeController {
             String text = stripper.getText(document);
             Resume resume = new Resume();
             resume.setRawText(text);
-            resumeRepo.save(resume);
             resume.setUploadedAt(java.time.LocalDateTime.now());
             resume.setUserId(1L);
+            resumeRepo.save(resume);
             return "Resume uploaded!";
         } catch (IOException e) {
             return "Upload failed.";
