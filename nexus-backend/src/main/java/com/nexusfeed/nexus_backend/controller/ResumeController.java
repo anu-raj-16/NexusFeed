@@ -1,11 +1,13 @@
 package com.nexusfeed.nexus_backend.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.Loader;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,5 +42,10 @@ public class ResumeController {
         } catch (IOException e) {
             return "Upload failed.";
         }
+    }
+
+    @GetMapping
+    public List<Resume> listAll() {
+        return resumeRepo.findAll();
     }
 }
