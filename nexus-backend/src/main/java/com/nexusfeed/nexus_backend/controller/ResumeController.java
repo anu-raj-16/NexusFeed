@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.nexusfeed.nexus_backend.model.Job;
+import com.nexusfeed.nexus_backend.model.JobMatch;
 import com.nexusfeed.nexus_backend.model.Resume;
 import com.nexusfeed.nexus_backend.repository.JobRepository;
 import com.nexusfeed.nexus_backend.repository.ResumeRepository;
+import com.nexusfeed.nexus_backend.service.ResumeService;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -29,10 +31,12 @@ public class ResumeController {
 
     private final ResumeRepository resumeRepo;
     private final JobRepository jobRepo;
+    private final ResumeService service;
 
-    ResumeController(ResumeRepository repo, JobRepository jobRepo) {
+    ResumeController(ResumeRepository repo, JobRepository jobRepo, ResumeService service) {
         this.resumeRepo = repo;
         this.jobRepo = jobRepo;
+        this.service = service;
     }
 
     @PostMapping("/upload")
@@ -57,13 +61,14 @@ public class ResumeController {
     }
 
     @GetMapping("/{id}/match")
-    public ResponseEntity<List<Job>> matchEntity(@PathVariable Long id) {
+    public ResponseEntity<List<JobMatch>> matchEntity(@PathVariable Long id) {
         Optional<Resume> curr_resume = resumeRepo.findById(id);
         if (curr_resume.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         Resume resume = curr_resume.get();
         List<Job> jobs = jobRepo.findAll();
-        return ResponseEntity.ok(jobs);
+        List<JobMatch> scoredJobs = service.scoreJobs(resume, jobs);
+        return ResponseEntity.ok(scoredJobs);
     }
 }
