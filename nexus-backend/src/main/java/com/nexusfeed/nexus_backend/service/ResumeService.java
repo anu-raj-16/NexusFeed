@@ -41,7 +41,7 @@ public class ResumeService {
                              .replace("\"", "\\\"")
                              .replace("\n", "\\n");
             String response = restClient.post()
-                .uri("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + geminiApiKey)
+            .uri("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + geminiApiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body("{\"contents\":[{\"parts\":[{\"text\":\"" + escapedPrompt + "\"}]}]}")
                 .retrieve()
