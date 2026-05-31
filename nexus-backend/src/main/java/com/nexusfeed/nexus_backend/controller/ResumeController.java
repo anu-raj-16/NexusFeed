@@ -48,8 +48,8 @@ public class ResumeController {
             resume.setRawText(text);
             resume.setUploadedAt(java.time.LocalDateTime.now());
             resume.setUserId(1L);
-            resumeRepo.save(resume);
-            return "Resume uploaded!";
+            Resume saved = resumeRepo.save(resume);
+            return String.valueOf(saved.getId());
         } catch (IOException e) {
             return "Upload failed.";
         }

@@ -24,6 +24,10 @@
             });
             async function uploadResume() {
                 console.log("uploadResume called");
+
+                const container = document.getElementById('match-section');
+                container.innerHTML = "<p>Analyzing your resume... this may take a minute.</p>";
+
                 const file = document.getElementById('resumeFile').files[0];
                 const formData = new FormData();
                 formData.append('file', file);
@@ -32,8 +36,24 @@
                     method: 'POST',
                     body: formData
                 });
+
                 const msg = await res.text();
-                alert(msg);
+                const promptRes = await fetch('https://nexusfeed-06zv.onrender.com/api/resumes/'+ msg + '/match', {
+                    method: 'GET'
+                });
+                
+                const finalRes = await promptRes.text();
+                const matches = JSON.parse(finalRes);
+                const htmlTemplate = matches.map(match => `
+                            <div class="match-card">
+                                <h3>${escapeHtml(match.job.title)}</h3>
+                                <p>Source: ${escapeHtml(match.job.source)}</p>
+                                <p>Score: ${match.score}%</p>
+                                <p>Matched: ${match.matchedSkills.join(', ')}</p>
+                                <p>Gaps: ${match.gaps.join(', ')}</p>
+                            </div>`
+                        ).join('');
+                container.innerHTML = htmlTemplate;
             }
             async function loadJobs() {
                 const container = document.getElementById('jobs-section');
@@ -76,5 +96,8 @@
         <div id = "jobs-section">
             <p>Loading users, please wait...</p>
         </div>      
+        <div id="match-section">
+            <!-- match results go here -->
+        </div>
     </body>
 </html>

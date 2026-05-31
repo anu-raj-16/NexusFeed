@@ -67,6 +67,7 @@ public class ResumeService {
             }
             
         }
+        matches.sort((a, b) -> Float.compare(b.getScore(), a.getScore()));
         return matches;
     }
     
