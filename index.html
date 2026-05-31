@@ -41,9 +41,11 @@
                 const promptRes = await fetch('https://nexusfeed-06zv.onrender.com/api/resumes/'+ msg + '/match', {
                     method: 'GET'
                 });
-                
+
                 const finalRes = await promptRes.text();
                 const matches = JSON.parse(finalRes);
+                console.log("finalRes:", finalRes);
+                console.log("matches:", matches);
                 const htmlTemplate = matches.map(match => `
                             <div class="match-card">
                                 <h3>${escapeHtml(match.job.title)}</h3>
