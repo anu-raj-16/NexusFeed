@@ -62,8 +62,8 @@ public class ResumeService {
                 List<String> gaps = mapper.convertValue(result.path("gaps"), List.class);
 
                 matches.add(new JobMatch(job, score, matchedSkills, gaps));
-            } catch (IOException e) {
-                System.out.println("Failed to parse Gemini response for job: " + job.getId());
+            } catch (Exception e) {
+                System.out.println("Failed to score job " + job.getId() + ": " + e.getMessage());
             }
             
         }
