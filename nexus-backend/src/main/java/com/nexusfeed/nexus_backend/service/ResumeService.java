@@ -40,13 +40,13 @@ public class ResumeService {
             String escapedPrompt = prompt.replace("\\", "\\\\")
                              .replace("\"", "\\\"")
                              .replace("\n", "\\n");
-            String response = restClient.post()
+            try {
+                String response = restClient.post()
                 .uri("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + geminiApiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body("{\"contents\":[{\"parts\":[{\"text\":\"" + escapedPrompt + "\"}]}]}")
                 .retrieve()
                 .body(String.class);
-            try {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response);
                 String text = root.path("candidates")
