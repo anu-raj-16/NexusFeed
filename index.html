@@ -46,6 +46,10 @@
                 const matches = JSON.parse(finalRes);
                 console.log("finalRes:", finalRes);
                 console.log("matches:", matches);
+                if (!Array.isArray(matches) || matches.length === 0) {
+                    container.innerHTML = "<p>No matches found. Try again in a moment.</p>";
+                    return;
+                }
                 const htmlTemplate = matches.map(match => `
                             <div class="match-card">
                                 <h3>${escapeHtml(match.job.title)}</h3>
