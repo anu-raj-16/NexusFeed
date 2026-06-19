@@ -3,7 +3,7 @@ import os
 import aggregator
 
 def get_connection():
-    return psycopg2.connect(os.getenv("DATABASE_URL"))
+    return psycopg2.connect(os.getenv("PG_URL"))
 
 
 def init_db(conn):
