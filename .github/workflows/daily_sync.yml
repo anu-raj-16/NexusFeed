@@ -1,12 +1,11 @@
 name: Daily Job Sync
-
 on:
   schedule:
-    - cron: '0 8 * * *' # Runs at 8:00 AM every day
-  workflow_dispatch: # Allows you to run it manually for testing
+    - cron: '0 8 * * *'
+  workflow_dispatch:
 
 jobs:
-  build:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,16 +17,9 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: |
-          pip install feedparser
+        run: pip install feedparser beautifulsoup4 psycopg2-binary
 
-      - name: Run aggregator
+      - name: Run scraper
+        env:
+          PG_URL: ${{ secrets.PG_URL }}
         run: python main.py
-
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add jobs.db
-          git commit -m "Automated database update" || exit 0
-          git push
