@@ -16,8 +16,12 @@ public class Job {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(columnDefinition = "TEXT")  
+    private String title;
+    
     private String source;
     private String published;
 
