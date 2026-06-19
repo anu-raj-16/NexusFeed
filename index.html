@@ -11,6 +11,18 @@
             h3 { color: #1aaee8; margin-top: 0; }
             #search { padding: 10px; width: 300px; border-radius: 6px; border: 1px solid #ddd; }
             button { padding: 10px 20px; border-radius: 6px; border: none; background: #1aaee8; color: white; cursor: pointer; }
+            .match-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 5px solid #1aaee8; }
+
+            .score-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold; color: white; margin-bottom: 10px; }
+
+            .score-high { background-color: #27ae60; }
+            .score-mid { background-color: #f39c12; }
+            .score-low { background-color: #e74c3c; }
+
+            .search-section { margin-bottom: 20px; }
+            .resume-section { margin-bottom: 30px; }
+
+            #loading { text-align: center; color: #666; font-style: italic; }
         </style>
         <script>
             function escapeHtml(str) {
@@ -50,15 +62,17 @@
                     container.innerHTML = "<p>No matches found. Try again in a moment.</p>";
                     return;
                 }
-                const htmlTemplate = matches.map(match => `
-                            <div class="match-card">
-                                <h3>${escapeHtml(match.job.title)}</h3>
-                                <p>Source: ${escapeHtml(match.job.source)}</p>
-                                <p>Score: ${match.score}%</p>
-                                <p>Matched: ${match.matchedSkills.join(', ')}</p>
-                                <p>Gaps: ${match.gaps.join(', ')}</p>
-                            </div>`
-                        ).join('');
+                const htmlTemplate = matches.map(match => {
+                const scoreClass = match.score >= 70 ? 'score-high' : match.score >= 40 ? 'score-mid' : 'score-low';
+                return `
+                        <div class="match-card">
+                            <span class="score-badge ${scoreClass}">${match.score}% Match</span>
+                            <h3>${escapeHtml(match.job.title)}</h3>
+                            <p><strong>Source:</strong> ${escapeHtml(match.job.source)}</p>
+                            <p><strong>Matched:</strong> ${match.matchedSkills.join(', ')}</p>
+                            <p><strong>Gaps:</strong> ${match.gaps.join(', ')}</p>
+                        </div>`;
+                }).join('');
                 container.innerHTML = htmlTemplate;
             }
             async function loadJobs() {
@@ -94,16 +108,22 @@
         </script>
     </head>
     <body>
-        <h1>NexusFeed - Content Aggregator</h1>
-        <input type="text" id="search" name="username" placeholder="Enter text">
-        <input type="file" id="resumeFile" accept=".pdf">
-        <button type="button" onclick="uploadResume()">Upload Resume</button>
-        <button type="button" onclick="loadJobs()">Search</button>
-        <div id = "jobs-section">
-            <p>Loading users, please wait...</p>
-        </div>      
-        <div id="match-section">
-            <!-- match results go here -->
+        <h1>NexusFeed</h1>
+        
+        <div class="search-section">
+            <input type="text" id="search" placeholder="Search jobs...">
+            <button type="button" onclick="loadJobs()">Search</button>
         </div>
+    
+        <div class="resume-section">
+            <input type="file" id="resumeFile" accept=".pdf">
+            <button type="button" onclick="uploadResume()">Match My Resume</button>
+        </div>
+    
+        <div id="jobs-section">
+            <p>Loading jobs...</p>
+        </div>
+    
+        <div id="match-section"></div>
     </body>
 </html>
