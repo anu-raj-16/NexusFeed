@@ -23,8 +23,12 @@ public class ResumeService {
     @Value("${GEMINI_API_KEY}")
     private String geminiApiKey;
 
-    private RestClient restClient = RestClient.create();
+    private final RestClient restClient;
 
+    public ResumeService(RestClient.Builder builder) {
+        this.restClient = builder.build();
+    }
+    
     public List<JobMatch> scoreJobs(Resume resume, List<Job> jobs) {
         List<JobMatch> matches = new ArrayList<>();
         for (Job job: jobs) {

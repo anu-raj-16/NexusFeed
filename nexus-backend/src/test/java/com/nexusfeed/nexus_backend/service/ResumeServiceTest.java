@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestClient;
 
 import com.nexusfeed.nexus_backend.model.JobMatch;
 import com.nexusfeed.nexus_backend.model.Resume;
@@ -17,7 +18,7 @@ public class ResumeServiceTest {
 
     @Test
     public void scoreJobs_returnsEmptyListWhenNoJobs() {
-        ResumeService service = new ResumeService();
+        ResumeService service = new ResumeService(RestClient.builder());
         Resume resume = new Resume();
         resume.setRawText("Python developer");
 
