@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.Loader;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.nexusfeed.nexus_backend.model.Job;
 import com.nexusfeed.nexus_backend.model.JobMatch;
 import com.nexusfeed.nexus_backend.model.Resume;
+import com.nexusfeed.nexus_backend.model.User;
 import com.nexusfeed.nexus_backend.repository.JobRepository;
 import com.nexusfeed.nexus_backend.repository.ResumeRepository;
+import com.nexusfeed.nexus_backend.repository.UserRepository;
 import com.nexusfeed.nexus_backend.service.ResumeService;
 
 @CrossOrigin(origins = "*")
@@ -32,11 +35,13 @@ public class ResumeController {
     private final ResumeRepository resumeRepo;
     private final JobRepository jobRepo;
     private final ResumeService service;
+    private final UserRepository userRepo;
 
-    ResumeController(ResumeRepository repo, JobRepository jobRepo, ResumeService service) {
+    ResumeController(ResumeRepository repo, JobRepository jobRepo, ResumeService service, UserRepository userRepo) {
         this.resumeRepo = repo;
         this.jobRepo = jobRepo;
         this.service = service;
+        this.userRepo = userRepo;
     }
 
     @PostMapping("/upload")
@@ -47,7 +52,12 @@ public class ResumeController {
             Resume resume = new Resume();
             resume.setRawText(text);
             resume.setUploadedAt(java.time.LocalDateTime.now());
-            resume.setUserId(1L);
+            String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+            User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+            resume.setUserId(user.getId());
             Resume saved = resumeRepo.save(resume);
             return String.valueOf(saved.getId());
         } catch (IOException e) {
