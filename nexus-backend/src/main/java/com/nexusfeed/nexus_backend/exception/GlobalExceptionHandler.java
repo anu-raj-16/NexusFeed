@@ -2,6 +2,7 @@ package com.nexusfeed.nexus_backend.exception;
 
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,4 +16,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(Map.of("message", "Invalid email or password"));
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> duplicateEmail(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(Map.of("message", "Email already exists"));
+    }
 }
+
+
