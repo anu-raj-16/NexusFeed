@@ -25,6 +25,9 @@
             #loading { text-align: center; color: #666; font-style: italic; }
         </style>
         <script>
+
+            let authToken = null;
+            
             function escapeHtml(str) {
                 const d = document.createElement('div');
                 d.textContent = str;
@@ -114,7 +117,6 @@
                 }
             }
 
-            let authToken = null;
 
             async function login() {
                 const email = document.getElementById('loginEmail').value;
