@@ -35,6 +35,10 @@
                 loadJobs();
             });
             async function uploadResume() {
+                if (!authToken) {
+                    alert("Please login or sign up first!");
+                    return;
+                }
                 console.log("uploadResume called");
 
                 const container = document.getElementById('match-section');
@@ -53,6 +57,7 @@
                 });
 
                 const msg = await res.text();
+                alert(msg)
                 const promptRes = await fetch('https://nexusfeed-06zv.onrender.com/api/resumes/'+ msg + '/match', {
                     method: 'GET'
                 });
