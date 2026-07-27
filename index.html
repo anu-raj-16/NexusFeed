@@ -46,6 +46,9 @@
 
                 const res = await fetch('https://nexusfeed-06zv.onrender.com/api/resumes/upload', {
                     method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken
+                    },
                     body: formData
                 });
 
@@ -105,6 +108,37 @@
                     container.innerHTML = "<p>Backend is offline. Run your Java app!</p>";
                 }
             }
+
+            let authToken = null;
+
+            async function login() {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                const res = await fetch('https://your-app.onrender.com/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+                authToken = data.token;
+                alert("Logged in!")
+            }
+            async function signup() {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                const res = await fetch('https://your-app.onrender.com/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+                authToken = data.token;
+                alert("Signed in!")
+            }
         </script>
     </head>
     <body>
@@ -113,6 +147,13 @@
         <div class="search-section">
             <input type="text" id="search" placeholder="Search jobs...">
             <button type="button" onclick="loadJobs()">Search</button>
+        </div>
+
+        <div class="login-section">
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button type="button" onclick="login()">Login</button>
+            <button type="button" onclick="signup()">Sign Up</button>
         </div>
     
         <div class="resume-section">
