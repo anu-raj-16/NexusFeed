@@ -10,7 +10,7 @@ import java.io.IOException;
 
 @Component
 @org.springframework.core.annotation.Order(1)
-public class CorsFilter extends OncePerRequestFilter {
+public class CustomCorsFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
