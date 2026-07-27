@@ -9,5 +9,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class AuthResponse {
     @Value("${JWT_SECRET}")
-    private String secretKey;
+    private String token;
 }
