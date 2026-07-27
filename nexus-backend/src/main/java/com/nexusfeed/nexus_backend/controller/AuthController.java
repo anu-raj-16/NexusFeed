@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nexusfeed.nexus_backend.model.AuthRequest;
@@ -21,12 +22,18 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public AuthResponse signUp(@RequestBody AuthRequest request) {
+    public AuthResponse signUp(@RequestParam String email, @RequestParam String password) {
+        AuthRequest request = new AuthRequest();
+        request.setEmail(email);
+        request.setPassword(password);
         return service.signup(request);
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
+    public AuthResponse login(@RequestParam String email, @RequestParam String password) {
+        AuthRequest request = new AuthRequest();
+        request.setEmail(email);
+        request.setPassword(password);
         return service.login(request);
     }
 }

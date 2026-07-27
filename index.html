@@ -122,24 +122,31 @@
                 const email = document.getElementById('loginEmail').value;
                 const password = document.getElementById('loginPassword').value;
                 
-                const res = await fetch('https://your-app.onrender.com/api/auth/login', {
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('password', password);
+                
+                const res = await fetch('https://nexusfeed-06zv.onrender.com/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: formData
                 });
 
                 const data = await res.json();
                 authToken = data.token;
-                alert("Logged in!")
+                alert("Logged in!");
             }
+            
             async function signup() {
                 const email = document.getElementById('loginEmail').value;
                 const password = document.getElementById('loginPassword').value;
                 
-                const res = await fetch('https://your-app.onrender.com/api/auth/signup', {
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('password', password);
+
+                const res = await fetch('https://nexusfeed-06zv.onrender.com/api/auth/signup', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: formData
                 });
 
                 const data = await res.json();
