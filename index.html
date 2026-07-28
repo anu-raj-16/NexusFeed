@@ -1,184 +1,563 @@
 <!DOCTYPE html>
-<html lang = "en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>NexusFeed</title>
-        <style>
-            body { font-family: 'Oswald', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 40px; }
-            .job-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
-            .job-card:hover { transform: translateY(-5px); }
-            h3 { color: #1aaee8; margin-top: 0; }
-            #search { padding: 10px; width: 300px; border-radius: 6px; border: 1px solid #ddd; }
-            button { padding: 10px 20px; border-radius: 6px; border: none; background: #1aaee8; color: white; cursor: pointer; }
-            .match-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 5px solid #1aaee8; }
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusFeed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-            .score-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold; color: white; margin-bottom: 10px; }
+        :root {
+            --bg: #0a0f1e;
+            --surface: #111827;
+            --card: #1a2540;
+            --border: #1e2d4a;
+            --blue: #1aaee8;
+            --blue-dim: rgba(26, 174, 232, 0.12);
+            --text: #e8edf5;
+            --muted: #8899b0;
+            --green: #27ae60;
+            --orange: #f39c12;
+            --red: #e74c3c;
+        }
 
-            .score-high { background-color: #27ae60; }
-            .score-mid { background-color: #f39c12; }
-            .score-low { background-color: #e74c3c; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 0;
+        }
 
-            .search-section { margin-bottom: 20px; }
-            .resume-section { margin-bottom: 30px; }
+        /* NAV */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-            #loading { text-align: center; color: #666; font-style: italic; }
-        </style>
-        <script>
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--blue);
+            letter-spacing: -0.5px;
+        }
 
-            let authToken = null;
-            
-            function escapeHtml(str) {
-                const d = document.createElement('div');
-                d.textContent = str;
-                return d.innerHTML;
-            }
+        .logo span { color: var(--text); }
 
-            document.addEventListener('DOMContentLoaded', () => {
-                loadJobs();
-            });
-            async function uploadResume() {
-                if (!authToken) {
-                    alert("Please login or sign up first!");
-                    return;
-                }
-                console.log("uploadResume called");
+        .nav-auth {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
 
-                const container = document.getElementById('match-section');
-                container.innerHTML = "<p>Analyzing your resume... this may take a minute.</p>";
+        .nav-auth input {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            width: 180px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
 
-                const file = document.getElementById('resumeFile').files[0];
-                const formData = new FormData();
-                formData.append('file', file);
+        .nav-auth input:focus { border-color: var(--blue); }
+        .nav-auth input::placeholder { color: var(--muted); }
 
-                const res = await fetch('https://nexusfeed-06zv.onrender.com/api/resumes/upload', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + authToken
-                    },
-                    body: formData
-                });
+        .btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-                const msg = await res.text();
-                alert(msg)
-                const promptRes = await fetch('https://nexusfeed-06zv.onrender.com/api/resumes/'+ msg + '/match', {
-                    method: 'GET'
-                });
+        .btn-primary {
+            background: var(--blue);
+            color: #fff;
+        }
 
-                const finalRes = await promptRes.text();
-                const matches = JSON.parse(finalRes);
-                console.log("finalRes:", finalRes);
-                console.log("matches:", matches);
-                if (!Array.isArray(matches) || matches.length === 0) {
-                    container.innerHTML = "<p>No matches found. Try again in a moment.</p>";
-                    return;
-                }
-                const htmlTemplate = matches.map(match => {
-                const scoreClass = match.score >= 70 ? 'score-high' : match.score >= 40 ? 'score-mid' : 'score-low';
-                return `
-                        <div class="match-card">
-                            <span class="score-badge ${scoreClass}">${match.score}% Match</span>
-                            <h3>${escapeHtml(match.job.title)}</h3>
-                            <p><strong>Source:</strong> ${escapeHtml(match.job.source)}</p>
-                            <p><strong>Matched:</strong> ${match.matchedSkills.join(', ')}</p>
-                            <p><strong>Gaps:</strong> ${match.gaps.join(', ')}</p>
-                        </div>`;
-                }).join('');
-                container.innerHTML = htmlTemplate;
-            }
-            async function loadJobs() {
-                const container = document.getElementById('jobs-section');
-                const keyword = document.getElementById('search').value; 
+        .btn-primary:hover { background: #0e9fd6; }
 
-                url = `https://nexusfeed-06zv.onrender.com/api/jobs`
-                if (keyword) {
-                    url = `https://nexusfeed-06zv.onrender.com/api/jobs/search?keyword=${keyword}`
-                }
-                try {
-                    const res = await fetch(url);
+        .btn-ghost {
+            background: transparent;
+            color: var(--blue);
+            border: 1px solid var(--border);
+        }
 
-                    if (res.ok) {
-                        const jobs = await res.json();
-                        console.log("Jobs received:", jobs);
-                        const htmlTemplate = jobs.map(job => `
-                            <div class="job-card">
-                                <h3>${escapeHtml(job.title)}</h3>
-                                <p>${escapeHtml(job.description)}</p>
-                                <p>Source: ${escapeHtml(job.source)} | Published: ${escapeHtml(job.published)}</p>
-                            </div>`
-                        ).join('');
+        .btn-ghost:hover { border-color: var(--blue); background: var(--blue-dim); }
 
-                        container.innerHTML = htmlTemplate;
-                    } else {
-                        container.innerHTML = "<p>No jobs found for that keyword.</p>";
-                    }
-                } catch (error) {
-                    container.innerHTML = "<p>Backend is offline. Run your Java app!</p>";
-                }
-            }
+        #auth-status {
+            font-size: 0.8rem;
+            color: var(--green);
+            display: none;
+        }
 
+        /* MAIN LAYOUT */
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: calc(100vh - 65px);
+        }
 
-            async function login() {
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                const formData = new FormData();
-                formData.append('email', email);
-                formData.append('password', password);
-                
-                const res = await fetch('https://nexusfeed-06zv.onrender.com/api/auth/login', {
-                    method: 'POST',
-                    body: formData
-                });
+        /* LEFT PANEL — Jobs */
+        .panel {
+            padding: 32px 40px;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+        }
 
-                const data = await res.json();
-                authToken = data.token;
-                alert("Logged in!");
-            }
-            
-            async function signup() {
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                const formData = new FormData();
-                formData.append('email', email);
-                formData.append('password', password);
+        .panel-right {
+            padding: 32px 40px;
+            border-right: none;
+        }
 
-                const res = await fetch('https://nexusfeed-06zv.onrender.com/api/auth/signup', {
-                    method: 'POST',
-                    body: formData
-                });
+        .panel-header {
+            margin-bottom: 24px;
+        }
 
-                const data = await res.json();
-                authToken = data.token;
-                alert("Signed in!")
-            }
-        </script>
-    </head>
-    <body>
-        <h1>NexusFeed</h1>
-        
-        <div class="search-section">
-            <input type="text" id="search" placeholder="Search jobs...">
-            <button type="button" onclick="loadJobs()">Search</button>
+        .panel-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .panel-sub {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .search-row input {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-row input:focus { border-color: var(--blue); }
+        .search-row input::placeholder { color: var(--muted); }
+
+        /* JOB CARDS */
+        .job-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s, transform 0.2s;
+            cursor: default;
+        }
+
+        .job-card:hover {
+            border-color: var(--blue);
+            transform: translateY(-2px);
+        }
+
+        .job-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .job-meta {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .job-desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* RESUME UPLOAD */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            transition: border-color 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--blue);
+            background: var(--blue-dim);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .upload-sub {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        #resumeFile { display: none; }
+
+        /* MATCH CARDS */
+        .match-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .match-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .match-card.high::before { background: var(--green); }
+        .match-card.mid::before { background: var(--orange); }
+        .match-card.low::before { background: var(--red); }
+
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .score-high { background: rgba(39, 174, 96, 0.15); color: var(--green); }
+        .score-mid { background: rgba(243, 156, 18, 0.15); color: var(--orange); }
+        .score-low { background: rgba(231, 76, 60, 0.15); color: var(--red); }
+
+        .match-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .match-row {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .match-row strong {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--blue-dim);
+            color: var(--blue);
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 0.72rem;
+            margin: 2px 2px 2px 0;
+        }
+
+        .tag.gap {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e87070;
+        }
+
+        /* STATUS MESSAGES */
+        .status {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .loading-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--blue);
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .main { grid-template-columns: 1fr; }
+            .panel { border-right: none; border-bottom: 1px solid var(--border); }
+            nav { padding: 16px 20px; flex-wrap: wrap; gap: 12px; }
+            .nav-auth { flex-wrap: wrap; }
+            .nav-auth input { width: 140px; }
+            .panel, .panel-right { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">Nexus<span>Feed</span></div>
+    <div class="nav-auth">
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button class="btn btn-ghost" onclick="login()">Log in</button>
+        <button class="btn btn-primary" onclick="signup()">Sign up</button>
+        <span id="auth-status">✓ Signed in</span>
+    </div>
+</nav>
+
+<div class="main">
+
+    <!-- LEFT: Job Browser -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Remote Jobs</div>
+            <div class="panel-sub">Updated daily from We Work Remotely</div>
         </div>
-
-        <div class="login-section">
-            <input type="email" id="loginEmail" placeholder="Email">
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button type="button" onclick="login()">Login</button>
-            <button type="button" onclick="signup()">Sign Up</button>
+        <div class="search-row">
+            <input type="text" id="search" placeholder="Search by title or skill...">
+            <button class="btn btn-primary" onclick="loadJobs()">Search</button>
         </div>
-    
-        <div class="resume-section">
-            <input type="file" id="resumeFile" accept=".pdf">
-            <button type="button" onclick="uploadResume()">Match My Resume</button>
-        </div>
-    
         <div id="jobs-section">
-            <p>Loading jobs...</p>
+            <div class="status">
+                <span class="loading-dot"></span>
+                <span class="loading-dot"></span>
+                <span class="loading-dot"></span>
+            </div>
         </div>
-    
-        <div id="match-section"></div>
-    </body>
+    </div>
+
+    <!-- RIGHT: Resume Matcher -->
+    <div class="panel panel-right">
+        <div class="panel-header">
+            <div class="panel-title">Resume Matcher</div>
+            <div class="panel-sub">Upload your resume to see how you match each job</div>
+        </div>
+
+        <div class="upload-zone" onclick="document.getElementById('resumeFile').click()">
+            <div class="upload-icon">📄</div>
+            <div class="upload-label">Drop your resume here</div>
+            <div class="upload-sub">PDF only · Sign in first</div>
+        </div>
+        <input type="file" id="resumeFile" accept=".pdf" onchange="uploadResume()">
+
+        <div id="match-section">
+            <div class="status">Sign in and upload your resume to see matches</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let authToken = null;
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { loadJobs(); });
+
+    async function login() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        if (!email || !password) { alert('Enter email and password'); return; }
+
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        const res = await fetch('https://nexusfeed-06zv.onrender.com/api/auth/login', {
+            method: 'POST', body: formData
+        });
+
+        const data = await res.json();
+        if (data.token) {
+            authToken = data.token;
+            document.getElementById('auth-status').style.display = 'inline';
+            document.getElementById('loginEmail').style.display = 'none';
+            document.getElementById('loginPassword').style.display = 'none';
+            document.querySelector('.btn-ghost').style.display = 'none';
+            document.querySelector('.btn-primary').style.display = 'none';
+        } else {
+            alert(data.message || 'Login failed');
+        }
+    }
+
+    async function signup() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        if (!email || !password) { alert('Enter email and password'); return; }
+
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        const res = await fetch('https://nexusfeed-06zv.onrender.com/api/auth/signup', {
+            method: 'POST', body: formData
+        });
+
+        const data = await res.json();
+        if (data.token) {
+            authToken = data.token;
+            document.getElementById('auth-status').style.display = 'inline';
+            document.getElementById('loginEmail').style.display = 'none';
+            document.getElementById('loginPassword').style.display = 'none';
+            document.querySelector('.btn-ghost').style.display = 'none';
+            document.querySelector('.btn-primary').style.display = 'none';
+        } else {
+            alert(data.message || 'Signup failed');
+        }
+    }
+
+    async function uploadResume() {
+        if (!authToken) {
+            alert('Please sign in first');
+            return;
+        }
+
+        const file = document.getElementById('resumeFile').files[0];
+        if (!file) return;
+
+        const container = document.getElementById('match-section');
+        container.innerHTML = `<div class="status">
+            <span class="loading-dot"></span>
+            <span class="loading-dot"></span>
+            <span class="loading-dot"></span>
+            <br><br>Analyzing your resume against all jobs...<br>
+            <small style="color:var(--muted)">This may take 1–2 minutes</small>
+        </div>`;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch('https://nexusfeed-06zv.onrender.com/api/resumes/upload', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + authToken },
+            body: formData
+        });
+
+        const resumeId = await res.text();
+
+        const matchRes = await fetch(`https://nexusfeed-06zv.onrender.com/api/resumes/${resumeId}/match`);
+        const finalRes = await matchRes.text();
+        const matches = JSON.parse(finalRes);
+
+        if (!Array.isArray(matches) || matches.length === 0) {
+            container.innerHTML = '<div class="status">No matches found. Try again in a moment.</div>';
+            return;
+        }
+
+        container.innerHTML = matches.map(match => {
+            const scoreClass = match.score >= 70 ? 'high' : match.score >= 40 ? 'mid' : 'low';
+            const badgeClass = match.score >= 70 ? 'score-high' : match.score >= 40 ? 'score-mid' : 'score-low';
+            const matchedTags = match.matchedSkills.map(s => `<span class="tag">${escapeHtml(s)}</span>`).join('');
+            const gapTags = match.gaps.map(s => `<span class="tag gap">${escapeHtml(s)}</span>`).join('');
+
+            return `
+                <div class="match-card ${scoreClass}">
+                    <span class="score-badge ${badgeClass}">${match.score}% match</span>
+                    <div class="match-title">${escapeHtml(match.job.title)}</div>
+                    <div class="match-row"><strong>Matched</strong><br>${matchedTags}</div>
+                    <div class="match-row" style="margin-top:8px"><strong>Gaps</strong><br>${gapTags}</div>
+                </div>`;
+        }).join('');
+    }
+
+    async function loadJobs() {
+        const container = document.getElementById('jobs-section');
+        const keyword = document.getElementById('search').value;
+
+        let url = 'https://nexusfeed-06zv.onrender.com/api/jobs';
+        if (keyword) url = `https://nexusfeed-06zv.onrender.com/api/jobs/search?keyword=${keyword}`;
+
+        try {
+            const res = await fetch(url);
+            if (res.ok) {
+                const jobs = await res.json();
+                if (jobs.length === 0) {
+                    container.innerHTML = '<div class="status">No jobs found for that keyword.</div>';
+                    return;
+                }
+                container.innerHTML = jobs.map(job => `
+                    <div class="job-card">
+                        <div class="job-title">${escapeHtml(job.title)}</div>
+                        <div class="job-meta">${escapeHtml(job.source)} · ${escapeHtml(job.published)}</div>
+                        <div class="job-desc">${escapeHtml(job.description)}</div>
+                    </div>`
+                ).join('');
+            } else {
+                container.innerHTML = '<div class="status">No jobs found.</div>';
+            }
+        } catch (e) {
+            container.innerHTML = '<div class="status">Backend is warming up — refresh in 30 seconds.</div>';
+        }
+    }
+</script>
+
+</body>
 </html>
